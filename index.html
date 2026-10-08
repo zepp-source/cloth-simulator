@@ -3,9 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Professional cloth physics simulation" />
   <title>Cloth Studio</title>
-  <link rel="stylesheet" href="./styles/main.css" />
+  <style>
+    :root {
+      --bg: #04080f;
+      --panel: rgba(10,15,22,0.9);
+      --panel-border: rgba(255,255,255,0.08);
+      --text: rgba(255,255,255,0.86);
+      --muted: rgba(255,255,255,0.55);
+      --button: rgba(255,255,255,0.04);
+      --button-border: rgba(255,255,255,0.12);
+      --canvas-bg: #050b12;
+      --control: #edf5ff;
+      --control-dark: #111821;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; width: 100%; height: 100%;
+      overflow: hidden; background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 15%, rgba(105,126,255,0.08), transparent 25%), var(--bg);
+    }
+
+    #canvas {
+      display: block; width: 100vw; height: 100vh; background: var(--canvas-bg); cursor: crosshair; touch-action: none;
+    }
+
+    .panel {
+      position: fixed; left: 18px; top: 18px; width: 290px;
+      background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.34);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 10;
+    }
+
+    .panel.collapsed { transform: translateX(-260px); opacity: 0.7; }
+
+    .panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 13px 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .panel-header h1 {
+      margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text);
+    }
+
+    .toggle-btn {
+      width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--button-border);
+      background: var(--button); color: var(--text); font-size: 18px; cursor: pointer;
+    }
+
+    .panel-body {
+      padding: 14px 14px 12px; max-height: calc(100vh - 64px); overflow-y: auto;
+    }
+
+    .section { margin-bottom: 18px; }
+    .section-title {
+      display: block; margin-bottom: 10px; font-size: 10px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase; color: var(--muted);
+    }
+
+    .btn-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+    .mode-btn, .preset-btn, .action-btn {
+      border: 1px solid var(--button-border); background: var(--button); color: var(--text);
+      border-radius: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 9px 8px; cursor: pointer; transition: background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .mode-btn:hover, .preset-btn:hover, .action-btn:hover {
+      background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.18);
+    }
+
+    .mode-btn.active, .preset-btn.active {
+      background: #eef5ff; border-color: #eef5ff; color: #0d1117;
+    }
+
+    .slider-group {
+      display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: center; margin-bottom: 10px;
+    }
+
+    .slider-group label {
+      grid-column: 1 / -1; font-size: 11px; color: var(--text); opacity: 0.82;
+    }
+
+    .slider-group input[type="range"] {
+      width: 100%; accent-color: #d7e7ff; background: transparent; cursor: pointer;
+    }
+
+    .value {
+      min-width: 42px; text-align: right; font-size: 11px; font-weight: 600; color: var(--control);
+    }
+
+    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .info {
+      border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; color: var(--muted);
+      font-size: 11px; line-height: 1.6;
+    }
+
+    #fps { margin-top: 6px; color: var(--text); opacity: 0.9; }
+
+    @media (max-width: 700px) {
+      .panel { width: min(280px, calc(100vw - 24px)); left: 12px; top: 12px; }
+    }
+  </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
@@ -16,83 +121,293 @@
       <button class="toggle-btn" id="toggle-btn">−</button>
     </div>
 
-    <div class="panel-body" id="panel-body">
-      <!-- Presets -->
+    <div class="panel-body">
       <div class="section">
         <label class="section-title">Material</label>
-        <div class="buttons">
-          <button class="btn active" data-preset="silk">Silk</button>
-          <button class="btn" data-preset="linen">Linen</button>
-          <button class="btn" data-preset="denim">Denim</button>
-          <button class="btn" data-preset="wool">Wool</button>
+        <div class="btn-row">
+          <button class="preset-btn active" data-preset="silk">Silk</button>
+          <button class="preset-btn" data-preset="linen">Linen</button>
+          <button class="preset-btn" data-preset="denim">Denim</button>
+          <button class="preset-btn" data-preset="wool">Wool</button>
         </div>
       </div>
 
-      <!-- Interaction -->
       <div class="section">
         <label class="section-title">Mode</label>
-        <div class="buttons">
-          <button class="btn active" data-mode="grab">Grab</button>
-          <button class="btn" data-mode="tear">Tear</button>
-          <button class="btn" data-mode="pin">Pin</button>
+        <div class="btn-row">
+          <button class="mode-btn active" data-mode="grab">Grab</button>
+          <button class="mode-btn" data-mode="tear">Tear</button>
+          <button class="mode-btn" data-mode="pin">Pin</button>
         </div>
       </div>
 
-      <!-- Physics -->
       <div class="section">
         <label class="section-title">Physics</label>
-        <div class="sliders">
-          <div class="slider">
-            <label>Stiffness</label>
-            <input type="range" id="stiffness" min="0.1" max="1" step="0.05" value="0.75" />
-            <span class="value" id="val-stiffness">0.75</span>
-          </div>
-          <div class="slider">
-            <label>Damping</label>
-            <input type="range" id="damping" min="0.95" max="1" step="0.001" value="0.9945" />
-            <span class="value" id="val-damping">0.9945</span>
-          </div>
-          <div class="slider">
-            <label>Gravity</label>
-            <input type="range" id="gravity" min="0" max="1.5" step="0.05" value="0.35" />
-            <span class="value" id="val-gravity">0.35</span>
-          </div>
-          <div class="slider">
-            <label>Tear Threshold</label>
-            <input type="range" id="tear" min="5" max="120" step="5" value="35" />
-            <span class="value" id="val-tear">35</span>
-          </div>
-          <div class="slider">
-            <label>Wind</label>
-            <input type="range" id="wind" min="0" max="3" step="0.1" value="0" />
-            <span class="value" id="val-wind">0.0</span>
-          </div>
-          <div class="slider">
-            <label>Iterations</label>
-            <input type="range" id="iterations" min="2" max="12" step="1" value="6" />
-            <span class="value" id="val-iterations">6</span>
-          </div>
+
+        <div class="slider-group">
+          <label for="stiffness">Stiffness</label>
+          <input id="stiffness" type="range" min="0.1" max="1.0" step="0.05" value="0.75" />
+          <span class="value" id="val-stiffness">0.75</span>
+        </div>
+
+        <div class="slider-group">
+          <label for="damping">Damping</label>
+          <input id="damping" type="range" min="0.95" max="1.0" step="0.001" value="0.9945" />
+          <span class="value" id="val-damping">0.9945</span>
+        </div>
+
+        <div class="slider-group">
+          <label for="gravity">Gravity</label>
+          <input id="gravity" type="range" min="0.0" max="1.5" step="0.05" value="0.35" />
+          <span class="value" id="val-gravity">0.35</span>
+        </div>
+
+        <div class="slider-group">
+          <label for="tear">Tear Threshold</label>
+          <input id="tear" type="range" min="5" max="120" step="5" value="35" />
+          <span class="value" id="val-tear">35</span>
+        </div>
+
+        <div class="slider-group">
+          <label for="wind">Wind</label>
+          <input id="wind" type="range" min="0.0" max="3.0" step="0.1" value="0.0" />
+          <span class="value" id="val-wind">0.00</span>
+        </div>
+
+        <div class="slider-group">
+          <label for="iterations">Iterations</label>
+          <input id="iterations" type="range" min="2" max="12" step="1" value="6" />
+          <span class="value" id="val-iterations">6</span>
         </div>
       </div>
 
-      <!-- Actions -->
       <div class="section">
-        <div class="buttons">
-          <button class="btn-action" id="reset">Reset</button>
-          <button class="btn-action" id="pause">Pause</button>
+        <div class="action-row">
+          <button class="action-btn" id="reset-btn">Reset</button>
+          <button class="action-btn" id="pause-btn">Pause</button>
         </div>
       </div>
 
-      <!-- Info -->
       <div class="info">
-        <p>Drag to grab • Right-click to tear • R to reset</p>
-        <p id="fps">FPS: 60</p>
+        <div>Drag to grab • Right-click to tear • R to reset</div>
+        <div id="fps">FPS: 60</div>
       </div>
     </div>
   </div>
 
-  <script src="./js/physics.js"></script>
-  <script src="./js/presets.js"></script>
-  <script src="./js/main.js"></script>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const W = 60, H = 40, SPACING = 14, EPS = 1e-8;
+    let damp = 0.9945, stiff = 0.75, grav = 0.35, tear = 35, wind = 0, rad = 42;
+    let pts = [], lks = [], touches = {}, m = { x:0, y:0, px:0, py:0, down:false, b:0 };
+    let wPhase = 0, touchMode = 'grab';
+    let iter = 6;
+
+    const setValueText = (id, value, digits = 2) => {
+      const el = document.getElementById(id); if (!el) return; el.textContent = Number(value).toFixed(digits);
+    };
+
+    function updateStaticLabels() {
+      setValueText('val-stiffness', stiff, 2);
+      setValueText('val-damping', damp, 4);
+      setValueText('val-gravity', grav, 2);
+      setValueText('val-tear', tear, 0);
+      setValueText('val-wind', wind, 2);
+      setValueText('val-iterations', iter, 0);
+    }
+
+    class Point {
+      constructor(x, y) { this.x = x; this.y = y; this.px = x; this.py = y; this.pinned = false; }
+      update() {
+        if (this.pinned) return;
+        const vx = (this.x - this.px) * damp;
+        const vy = (this.y - this.py) * damp;
+        this.px = this.x; this.py = this.y;
+        this.x += vx; this.y += vy + grav;
+        if (wind > 0) this.x += Math.sin(wPhase + this.y * 0.02) * wind * 0.12;
+      }
+    }
+
+    class Link {
+      constructor(p1, p2) { this.p1 = p1; this.p2 = p2; this.act = true; }
+      solve() {
+        if (!this.act) return;
+        let dx = this.p1.x - this.p2.x;
+        let dy = this.p1.y - this.p2.y;
+        let d = Math.hypot(dx, dy);
+        if (d < 0.0001 || !isFinite(d)) return;
+        if (d > tear) return this.act = false;
+        let diff = (SPACING - d) / (d + EPS) * 0.5 * stiff;
+        if (!this.p1.pinned) { this.p1.x += dx * diff; this.p1.y += dy * diff; }
+        if (!this.p2.pinned) { this.p2.x -= dx * diff; this.p2.y -= dy * diff; }
+      }
+      draw() {
+        if (!this.act) return;
+        let dx = this.p1.x - this.p2.x; let dy = this.p1.y - this.p2.y; let d = Math.hypot(dx, dy);
+        let s = (d - SPACING) / SPACING;
+        let r = 180, g = 180, b = 180;
+        if (s > 0) {
+          let t = Math.min(s / 0.35, 1.0);
+          r = Math.floor(180 + 60 * t); g = Math.floor(180 - 120 * t); b = Math.floor(180 - 160 * t);
+        }
+        ctx.strokeStyle = `rgb(${r},${g},${b})`; ctx.beginPath(); ctx.moveTo(this.p1.x, this.p1.y); ctx.lineTo(this.p2.x, this.p2.y); ctx.stroke();
+      }
+    }
+
+    function init() {
+      pts = []; lks = [];
+      const sx = (canvas.width - (W - 1) * SPACING) / 2;
+      const sy = 60;
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const p = new Point(sx + x * SPACING, sy + y * SPACING);
+          if (y === 0) p.pinned = true;
+          pts.push(p);
+        }
+      }
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const idx = y * W + x;
+          if (x < W - 1) lks.push(new Link(pts[idx], pts[idx + 1]));
+          if (y < H - 1) lks.push(new Link(pts[idx], pts[idx + W]));
+        }
+      }
+    }
+
+    function resize() {
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight; init();
+    }
+
+    const panel = document.getElementById('panel');
+    document.getElementById('toggle-btn').addEventListener('click', () => {
+      panel.classList.toggle('collapsed');
+      document.getElementById('toggle-btn').textContent = panel.classList.contains('collapsed') ? '+' : '−';
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', init);
+    document.getElementById('pause-btn').addEventListener('click', () => {
+      document.body.style.pointerEvents = document.body.style.pointerEvents === 'none' ? 'auto' : 'none';
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const preset = btn.dataset.preset;
+        if (preset === 'silk') { stiff = 0.88; damp = 0.998; grav = 0.28; tear = 42; wind = 0.25; }
+        if (preset === 'linen') { stiff = 0.72; damp = 0.995; grav = 0.38; tear = 34; wind = 0.15; }
+        if (preset === 'denim') { stiff = 0.92; damp = 0.992; grav = 0.42; tear = 55; wind = 0.35; }
+        if (preset === 'wool') { stiff = 0.68; damp = 0.989; grav = 0.48; tear = 60; wind = 0.45; }
+        document.getElementById('stiffness').value = stiff; document.getElementById('damping').value = damp; document.getElementById('gravity').value = grav; document.getElementById('tear').value = tear; document.getElementById('wind').value = wind; updateStaticLabels();
+      });
+    });
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        touchMode = btn.dataset.mode;
+      });
+    });
+
+    ['stiffness','damping','gravity','tear','wind','iterations'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', e => {
+        const v = parseFloat(e.target.value);
+        if (id === 'stiffness') stiff = v;
+        if (id === 'damping') damp = v;
+        if (id === 'gravity') grav = v;
+        if (id === 'tear') tear = v;
+        if (id === 'wind') wind = v;
+        if (id === 'iterations') iter = Math.round(v);
+
+        updateStaticLabels();
+      });
+    });
+
+    updateStaticLabels();
+    window.addEventListener('resize', resize);
+    window.addEventListener('contextmenu', e => e.preventDefault());
+
+    function getPointer(e) {
+      const rect = canvas.getBoundingClientRect();
+      m.px = m.x; m.py = m.y;
+      m.x = e.clientX - rect.left; m.y = e.clientY - rect.top;
+    }
+
+    window.addEventListener('mousedown', e => { m.down = true; m.b = e.button; getPointer(e); });
+    window.addEventListener('mouseup', () => { m.down = false; });
+    window.addEventListener('mousemove', getPointer);
+    window.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'r') init(); });
+
+    function handleTouch(e) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      touches = {};
+      for (let i = 0; i < e.touches.length; i++) {
+        const t = e.touches[i]; touches[t.identifier] = { x: t.clientX - rect.left, y: t.clientY - rect.top };
+      }
+    }
+
+    window.addEventListener('touchstart', handleTouch, { passive: false });
+    window.addEventListener('touchmove', handleTouch, { passive: false });
+    window.addEventListener('touchend', handleTouch, { passive: false });
+
+    let lastFps = performance.now();
+    let frames = 0;
+
+    function frame(now) {
+      wPhase += 0.03;
+      if (m.down && !m.b) {
+        const dx = m.x - m.px; const dy = m.y - m.py;
+        for (let p of pts) {
+          if (Math.hypot(p.x - m.x, p.y - m.y) < rad) {
+            p.x += dx * 0.6; p.y += dy * 0.6;
+          }
+        }
+      }
+
+      if (m.down && m.b === 2) {
+        for (let l of lks) {
+          if (l.act && Math.hypot((l.p1.x + l.p2.x) * 0.5 - m.x, (l.p1.y + l.p2.y) * 0.5 - m.y) < rad * 0.7) {
+            l.act = false;
+          }
+        }
+      }
+
+      Object.values(touches).forEach(t => {
+        if (touchMode === 'grab') {
+          pts.forEach(p => {
+            if (Math.hypot(p.x - t.x, p.y - t.y) < rad) {
+              p.x += (t.x - p.x) * 0.2; p.y += (t.y - p.y) * 0.2;
+            }
+          });
+        } else if (touchMode === 'tear') {
+          lks.forEach(l => {
+            if (l.act && Math.hypot((l.p1.x + l.p2.x) * 0.5 - t.x, (l.p1.y + l.p2.y) * 0.5 - t.y) < rad * 0.7) {
+              l.act = false;
+            }
+          });
+        } else if (touchMode === 'pin') {
+          pts.forEach(p => { if (Math.hypot(p.x - t.x, p.y - t.y) < rad) p.pinned = true; });
+        }
+      });
+
+      pts.forEach(p => p.update());
+      for (let s = 0; s < iter; s++) lks.forEach(l => l.solve());
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.lineWidth = 1.1; lks.forEach(l => l.draw());
+
+      frames++;
+      if (now - lastFps >= 1000) {
+        document.getElementById('fps').textContent = `FPS: ${frames}`;
+        frames = 0; lastFps = now;
+      }
+      requestAnimationFrame(frame);
+    }
+
+    resize(); requestAnimationFrame(frame);
+  </script>
 </body>
 </html>
