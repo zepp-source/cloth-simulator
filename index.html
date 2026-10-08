@@ -3,136 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Advanced cloth physics simulation with real-time rendering and material presets" />
-  <title>Cloth Simulation Studio</title>
+  <meta name="description" content="Professional cloth physics simulation" />
+  <title>Cloth Studio</title>
   <link rel="stylesheet" href="./styles/main.css" />
 </head>
 <body>
-  <div id="canvas-container">
-    <canvas id="glCanvas"></canvas>
-  </div>
+  <canvas id="canvas"></canvas>
 
-  <aside id="control-panel" class="panel">
+  <div class="panel" id="panel">
     <div class="panel-header">
       <h1>Cloth Studio</h1>
-      <button id="menu-toggle" class="menu-toggle" aria-label="Toggle panel">☰</button>
+      <button class="toggle-btn" id="toggle-btn">−</button>
     </div>
 
-    <div class="panel-content">
-      <section class="section">
-        <h3>Presets</h3>
-        <div class="preset-buttons">
-          <button class="preset-btn active" data-preset="silk">Silk</button>
-          <button class="preset-btn" data-preset="linen">Linen</button>
-          <button class="preset-btn" data-preset="denim">Denim</button>
-          <button class="preset-btn" data-preset="wool">Wool</button>
-          <button class="preset-btn" data-preset="rubber">Rubber</button>
+    <div class="panel-body" id="panel-body">
+      <!-- Presets -->
+      <div class="section">
+        <label class="section-title">Material</label>
+        <div class="buttons">
+          <button class="btn active" data-preset="silk">Silk</button>
+          <button class="btn" data-preset="linen">Linen</button>
+          <button class="btn" data-preset="denim">Denim</button>
+          <button class="btn" data-preset="wool">Wool</button>
         </div>
-      </section>
+      </div>
 
-      <section class="section">
-        <h3>Interaction</h3>
-        <div class="mode-buttons">
-          <button class="mode-btn active" data-mode="grab">Grab</button>
-          <button class="mode-btn" data-mode="tear">Tear</button>
-          <button class="mode-btn" data-mode="wind">Wind</button>
-          <button class="mode-btn" data-mode="pin">Pin</button>
+      <!-- Interaction -->
+      <div class="section">
+        <label class="section-title">Mode</label>
+        <div class="buttons">
+          <button class="btn active" data-mode="grab">Grab</button>
+          <button class="btn" data-mode="tear">Tear</button>
+          <button class="btn" data-mode="pin">Pin</button>
         </div>
-      </section>
+      </div>
 
-      <section class="section">
-        <h3>Physics</h3>
-
-        <div class="slider-group">
-          <label for="stiffness">Stiffness</label>
-          <input id="stiffness" type="range" min="0.1" max="1.0" step="0.05" value="0.75" />
-          <span id="stiffness-value" class="value-display">0.75</span>
+      <!-- Physics -->
+      <div class="section">
+        <label class="section-title">Physics</label>
+        <div class="sliders">
+          <div class="slider">
+            <label>Stiffness</label>
+            <input type="range" id="stiffness" min="0.1" max="1" step="0.05" value="0.75" />
+            <span class="value" id="val-stiffness">0.75</span>
+          </div>
+          <div class="slider">
+            <label>Damping</label>
+            <input type="range" id="damping" min="0.95" max="1" step="0.001" value="0.9945" />
+            <span class="value" id="val-damping">0.9945</span>
+          </div>
+          <div class="slider">
+            <label>Gravity</label>
+            <input type="range" id="gravity" min="0" max="1.5" step="0.05" value="0.35" />
+            <span class="value" id="val-gravity">0.35</span>
+          </div>
+          <div class="slider">
+            <label>Tear Threshold</label>
+            <input type="range" id="tear" min="5" max="120" step="5" value="35" />
+            <span class="value" id="val-tear">35</span>
+          </div>
+          <div class="slider">
+            <label>Wind</label>
+            <input type="range" id="wind" min="0" max="3" step="0.1" value="0" />
+            <span class="value" id="val-wind">0.0</span>
+          </div>
+          <div class="slider">
+            <label>Iterations</label>
+            <input type="range" id="iterations" min="2" max="12" step="1" value="6" />
+            <span class="value" id="val-iterations">6</span>
+          </div>
         </div>
+      </div>
 
-        <div class="slider-group">
-          <label for="damping">Damping</label>
-          <input id="damping" type="range" min="0.95" max="1.0" step="0.001" value="0.9945" />
-          <span id="damping-value" class="value-display">0.9945</span>
+      <!-- Actions -->
+      <div class="section">
+        <div class="buttons">
+          <button class="btn-action" id="reset">Reset</button>
+          <button class="btn-action" id="pause">Pause</button>
         </div>
+      </div>
 
-        <div class="slider-group">
-          <label for="gravity">Gravity</label>
-          <input id="gravity" type="range" min="0.0" max="1.5" step="0.05" value="0.35" />
-          <span id="gravity-value" class="value-display">0.35</span>
-        </div>
-
-        <div class="slider-group">
-          <label for="tear-threshold">Tear Threshold</label>
-          <input id="tear-threshold" type="range" min="5" max="120" step="5" value="35" />
-          <span id="tear-threshold-value" class="value-display">35</span>
-        </div>
-
-        <div class="slider-group">
-          <label for="wind-strength">Wind Strength</label>
-          <input id="wind-strength" type="range" min="0.0" max="3.5" step="0.1" value="0.4" />
-          <span id="wind-strength-value" class="value-display">0.4</span>
-        </div>
-
-        <div class="slider-group">
-          <label for="bounce">Bounce</label>
-          <input id="bounce" type="range" min="0.0" max="0.8" step="0.05" value="0.10" />
-          <span id="bounce-value" class="value-display">0.10</span>
-        </div>
-      </section>
-
-      <section class="section">
-        <h3>Cloth</h3>
-
-        <div class="slider-group">
-          <label for="width">Width</label>
-          <input id="width" type="range" min="30" max="120" step="5" value="75" />
-          <span id="width-value" class="value-display">75</span>
-        </div>
-
-        <div class="slider-group">
-          <label for="height">Height</label>
-          <input id="height" type="range" min="20" max="80" step="5" value="45" />
-          <span id="height-value" class="value-display">45</span>
-        </div>
-
-        <div class="slider-group">
-          <label for="spacing">Spacing</label>
-          <input id="spacing" type="range" min="8" max="22" step="1" value="14" />
-          <span id="spacing-value" class="value-display">14</span>
-        </div>
-      </section>
-
-      <section class="section">
-        <h3>Solver</h3>
-
-        <div class="slider-group">
-          <label for="iterations">Iterations</label>
-          <input id="iterations" type="range" min="2" max="15" step="1" value="6" />
-          <span id="iterations-value" class="value-display">6</span>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="action-buttons">
-          <button id="reset-btn" class="action-btn">Reset</button>
-          <button id="pause-btn" class="action-btn">Pause</button>
-        </div>
-      </section>
-
-      <section class="section info-section">
-        <p><strong>Controls</strong></p>
-        <p>• Left drag to grab</p>
-        <p>• Right click to tear</p>
-        <p>• Press R to reset</p>
-        <p id="fps-counter">FPS: 0</p>
-      </section>
+      <!-- Info -->
+      <div class="info">
+        <p>Drag to grab • Right-click to tear • R to reset</p>
+        <p id="fps">FPS: 60</p>
+      </div>
     </div>
-  </aside>
+  </div>
 
   <script src="./js/physics.js"></script>
-  <script src="./js/renderer.js"></script>
   <script src="./js/presets.js"></script>
-  <script src="./js/ui.js"></script>
-  <script src="./js/app.js"></script>
+  <script src="./js/main.js"></script>
 </body>
 </html>
