@@ -1,26 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Cloth Simulator</title>
-  <link rel="stylesheet" href="./styles/main.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Advanced cloth physics simulation with real-time rendering and material presets" />
+  <title>Cloth Simulation Studio</title>
+  <link rel="stylesheet" href="./styles/main.css" />
 </head>
 <body>
   <div id="canvas-container">
     <canvas id="glCanvas"></canvas>
   </div>
 
-  <!-- Control Panel -->
-  <div id="control-panel" class="panel">
+  <aside id="control-panel" class="panel">
     <div class="panel-header">
-      <h1>Cloth Simulator</h1>
-      <button id="menu-toggle" class="menu-toggle">☰</button>
+      <h1>Cloth Studio</h1>
+      <button id="menu-toggle" class="menu-toggle" aria-label="Toggle panel">☰</button>
     </div>
 
     <div class="panel-content">
-      <!-- Presets -->
-      <div class="section">
+      <section class="section">
         <h3>Presets</h3>
         <div class="preset-buttons">
           <button class="preset-btn active" data-preset="silk">Silk</button>
@@ -29,10 +28,9 @@
           <button class="preset-btn" data-preset="wool">Wool</button>
           <button class="preset-btn" data-preset="rubber">Rubber</button>
         </div>
-      </div>
+      </section>
 
-      <!-- Interaction Mode -->
-      <div class="section">
+      <section class="section">
         <h3>Interaction</h3>
         <div class="mode-buttons">
           <button class="mode-btn active" data-mode="grab">Grab</button>
@@ -40,103 +38,97 @@
           <button class="mode-btn" data-mode="wind">Wind</button>
           <button class="mode-btn" data-mode="pin">Pin</button>
         </div>
-      </div>
+      </section>
 
-      <!-- Physics Parameters -->
-      <div class="section">
+      <section class="section">
         <h3>Physics</h3>
-        
+
         <div class="slider-group">
           <label for="stiffness">Stiffness</label>
-          <input type="range" id="stiffness" min="0.1" max="1.0" step="0.05" value="0.75">
-          <span class="value-display" id="stiffness-value">0.75</span>
+          <input id="stiffness" type="range" min="0.1" max="1.0" step="0.05" value="0.75" />
+          <span id="stiffness-value" class="value-display">0.75</span>
         </div>
 
         <div class="slider-group">
           <label for="damping">Damping</label>
-          <input type="range" id="damping" min="0.95" max="1.0" step="0.001" value="0.9945">
-          <span class="value-display" id="damping-value">0.9945</span>
+          <input id="damping" type="range" min="0.95" max="1.0" step="0.001" value="0.9945" />
+          <span id="damping-value" class="value-display">0.9945</span>
         </div>
 
         <div class="slider-group">
           <label for="gravity">Gravity</label>
-          <input type="range" id="gravity" min="0.0" max="1.5" step="0.05" value="0.35">
-          <span class="value-display" id="gravity-value">0.35</span>
+          <input id="gravity" type="range" min="0.0" max="1.5" step="0.05" value="0.35" />
+          <span id="gravity-value" class="value-display">0.35</span>
         </div>
 
         <div class="slider-group">
           <label for="tear-threshold">Tear Threshold</label>
-          <input type="range" id="tear-threshold" min="5" max="120" step="5" value="35">
-          <span class="value-display" id="tear-threshold-value">35</span>
+          <input id="tear-threshold" type="range" min="5" max="120" step="5" value="35" />
+          <span id="tear-threshold-value" class="value-display">35</span>
         </div>
 
         <div class="slider-group">
           <label for="wind-strength">Wind Strength</label>
-          <input type="range" id="wind-strength" min="0.0" max="3.0" step="0.1" value="0.0">
-          <span class="value-display" id="wind-strength-value">0.0</span>
+          <input id="wind-strength" type="range" min="0.0" max="3.5" step="0.1" value="0.4" />
+          <span id="wind-strength-value" class="value-display">0.4</span>
         </div>
 
         <div class="slider-group">
           <label for="bounce">Bounce</label>
-          <input type="range" id="bounce" min="0.0" max="0.8" step="0.05" value="0.1">
-          <span class="value-display" id="bounce-value">0.1</span>
+          <input id="bounce" type="range" min="0.0" max="0.8" step="0.05" value="0.10" />
+          <span id="bounce-value" class="value-display">0.10</span>
         </div>
-      </div>
+      </section>
 
-      <!-- Cloth Properties -->
-      <div class="section">
+      <section class="section">
         <h3>Cloth</h3>
-        
+
         <div class="slider-group">
           <label for="width">Width</label>
-          <input type="range" id="width" min="30" max="120" step="5" value="75">
-          <span class="value-display" id="width-value">75</span>
+          <input id="width" type="range" min="30" max="120" step="5" value="75" />
+          <span id="width-value" class="value-display">75</span>
         </div>
 
         <div class="slider-group">
           <label for="height">Height</label>
-          <input type="range" id="height" min="20" max="80" step="5" value="45">
-          <span class="value-display" id="height-value">45</span>
+          <input id="height" type="range" min="20" max="80" step="5" value="45" />
+          <span id="height-value" class="value-display">45</span>
         </div>
 
         <div class="slider-group">
           <label for="spacing">Spacing</label>
-          <input type="range" id="spacing" min="8" max="20" step="1" value="14">
-          <span class="value-display" id="spacing-value">14</span>
+          <input id="spacing" type="range" min="8" max="22" step="1" value="14" />
+          <span id="spacing-value" class="value-display">14</span>
         </div>
-      </div>
+      </section>
 
-      <!-- Solver -->
-      <div class="section">
+      <section class="section">
         <h3>Solver</h3>
-        
+
         <div class="slider-group">
           <label for="iterations">Iterations</label>
-          <input type="range" id="iterations" min="2" max="15" step="1" value="5">
-          <span class="value-display" id="iterations-value">5</span>
+          <input id="iterations" type="range" min="2" max="15" step="1" value="6" />
+          <span id="iterations-value" class="value-display">6</span>
         </div>
-      </div>
+      </section>
 
-      <!-- Actions -->
-      <div class="section">
+      <section class="section">
         <div class="action-buttons">
-          <button id="reset-btn" class="action-btn">Reset Mesh</button>
+          <button id="reset-btn" class="action-btn">Reset</button>
           <button id="pause-btn" class="action-btn">Pause</button>
         </div>
-      </div>
+      </section>
 
-      <!-- Info -->
-      <div class="section info-section">
-        <p><strong>Controls:</strong></p>
-        <p>• Mouse drag: Interact with cloth</p>
-        <p>• Right-click: Tear (if enabled)</p>
-        <p>• Touch: Mobile support</p>
+      <section class="section info-section">
+        <p><strong>Controls</strong></p>
+        <p>• Left drag to grab</p>
+        <p>• Right click to tear</p>
+        <p>• Press R to reset</p>
         <p id="fps-counter">FPS: 0</p>
-      </div>
+      </section>
     </div>
-  </div>
+  </aside>
 
-  <!-- Scripts -->
   <script src="./js/physics.js"></script>
   <script src="./js/renderer.js"></script>
   <script src="./js/presets.js"></script>
