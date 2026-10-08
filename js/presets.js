@@ -1,34 +1,34 @@
 const PRESETS = {
   silk: {
-    stiffness: 0.88,
-    damping: 0.998,
-    gravity: 0.28,
-    tearThreshold: 50,
-    windStrength: 0.3,
-    iterations: 7
+    stiffness: 0.92,
+    damping: 0.9992,
+    gravity: 0.15,
+    tearThreshold: 60,
+    windStrength: 0.4,
+    iterations: 4
   },
   linen: {
-    stiffness: 0.72,
-    damping: 0.995,
-    gravity: 0.38,
-    tearThreshold: 35,
+    stiffness: 0.88,
+    damping: 0.998,
+    gravity: 0.25,
+    tearThreshold: 45,
     windStrength: 0.2,
-    iterations: 6
+    iterations: 3
   },
   denim: {
-    stiffness: 0.92,
-    damping: 0.992,
-    gravity: 0.42,
-    tearThreshold: 65,
-    windStrength: 0.4,
-    iterations: 8
+    stiffness: 0.96,
+    damping: 0.996,
+    gravity: 0.3,
+    tearThreshold: 80,
+    windStrength: 0.3,
+    iterations: 5
   },
   wool: {
-    stiffness: 0.65,
-    damping: 0.989,
-    gravity: 0.48,
-    tearThreshold: 60,
+    stiffness: 0.85,
+    damping: 0.994,
+    gravity: 0.35,
+    tearThreshold: 70,
     windStrength: 0.5,
-    iterations: 9
+    iterations: 6
   }
 };
